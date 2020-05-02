@@ -104,7 +104,7 @@ them instead."
    :on-root-node-open   (treemacs--collapse-root-node btn arg)
    :on-root-node-closed (treemacs--expand-root-node btn)
    :on-dir-node-open    (treemacs--collapse-dir-node btn arg)
-   :on-dir-node-closed  (treemacs--expand-dir-node btn :recursive arg)
+   :on-dir-node-closed  (treemacs--expand-dir-node btn :recursive (treemacs--translate-prefix-arg arg))
    :on-file-node-open   (treemacs--collapse-file-node btn arg)
    :on-file-node-closed (treemacs--expand-file-node btn arg)
    :on-tag-node-open    (treemacs--collapse-tag-node btn arg)
@@ -130,7 +130,7 @@ The prefix argument ARG is treated the same way as with `treemacs-toggle-node'."
    :on-root-node-open   (treemacs--collapse-root-node btn arg)
    :on-root-node-closed (treemacs--expand-root-node btn)
    :on-dir-node-open    (treemacs--collapse-dir-node btn arg)
-   :on-dir-node-closed  (treemacs--expand-dir-node btn :recursive arg)
+   :on-dir-node-closed  (treemacs--expand-dir-node btn :recursive (treemacs--translate-prefix-arg arg))
    :on-file-node-open   (treemacs--collapse-file-node btn arg)
    :on-file-node-closed (treemacs--expand-file-node btn arg)
    :on-tag-node-open    (treemacs--visit-or-expand/collapse-tag-node btn arg t)
@@ -150,7 +150,7 @@ This function's exact configuration is stored in `treemacs-TAB-actions-config'."
   (-when-let (state (treemacs--prop-at-point :state))
     (--if-let (cdr (assq state treemacs-TAB-actions-config))
         (progn
-          (funcall it arg)
+          (funcall it (treemacs--translate-prefix-arg arg))
           (treemacs--evade-image))
       (treemacs-pulse-on-failure "No TAB action defined for node of type %s."
         (propertize (format "%s" state) 'face 'font-lock-type-face)))))

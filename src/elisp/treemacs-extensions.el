@@ -356,9 +356,9 @@ additional keys."
            `((put ',open-state-name :treemacs-visit-action ,visit-action)
              (put ',closed-state-name :treemacs-visit-action ,visit-action)))
 
-       (defun ,expand-name (&optional _)
+       (defun ,expand-name (&optional arg)
          ,(format "Expand treemacs nodes of type `%s'." name)
-         (interactive)
+         (interactive "P")
          (treemacs-block
           (-let [node (treemacs-node-at-point)]
             (when (null node)
@@ -368,9 +368,9 @@ additional keys."
               (treemacs-return
                (treemacs-pulse-on-failure "This function cannot expand a node of type '%s'."
                  (propertize (format "%s" (treemacs-button-get node :state)) 'face 'font-lock-type-face))))
-            (,do-expand-name node))))
+            (,do-expand-name node (treemacs--translate-prefix-arg arg)))))
 
-       (defun ,do-expand-name (node)
+       (defun ,do-expand-name (node recursive)
          ,(format "Execute expansion of treemacs nodes of type `%s'." name)
          (let ((items ,query-function)
                (depth (1+ (treemacs-button-get node :depth)))
@@ -391,7 +391,14 @@ additional keys."
             (progn
               (treemacs-on-expand (treemacs-button-get node :path) node)
               (treemacs--reentry (treemacs-button-get node :path))
-              ,after-expand))))
+              ,after-expand
+              (when (> recursive 0)
+                (cl-decf recursive)
+                (--each (treemacs-collect-child-nodes node)
+                  (when (treemacs-is-node-collapsed? node)
+                    (goto-char (treemacs-button-start it))
+                    (funcall (alist-get (treemacs-button-get node :state) treemacs-TAB-actions-config)
+                             node recursive))))))))
 
        (defun ,collapse-name (&optional _)
          ,(format "Collapse treemacs nodes of type `%s'." name)
